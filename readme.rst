@@ -14,7 +14,7 @@ Requirements
 
 This binding library is developped with...
 
-- libHaru
+- libHaru 2.4.0
 - SML/NJ 110.77
 
 

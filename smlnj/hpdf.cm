@@ -1,0 +1,7 @@
+library (0.0.1)
+  structure Hpdf
+is
+  $/basis.cm
+  $c/c.cm
+  FFI/libharu.cm : make (-f Makefile)
+  hpdf.sml
