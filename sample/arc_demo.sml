@@ -129,6 +129,9 @@ struct
         C.discard' point
     end
 
+  fun get_x obj = C.Get.float' (S__HPDF_Point.f_x' obj)
+  fun get_y obj = C.Get.float' (S__HPDF_Point.f_y' obj)
+
   fun main (name, args) =
     (case args
        of [] => OS.Process.failure
@@ -154,8 +157,6 @@ struct
               F_HPDF_Page_LineTo.f'(page, 100.0, 100.0);
               F_HPDF_Page_Arc.f'(page, 100.0, 100.0, 80.0, 0.0, 360.0 * 0.45);
             let
-              fun get_x obj = C.Get.float' (S__HPDF_Point.f_x' obj)
-              fun get_y obj = C.Get.float' (S__HPDF_Point.f_y' obj)
               val pos = HPDF_Page_GetCurrentPos page
             in
               F_HPDF_Page_LineTo.f'(page, 100.0, 100.0);
