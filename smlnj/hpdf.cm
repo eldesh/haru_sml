@@ -3,5 +3,6 @@ library (0.0.1)
 is
   $/basis.cm
   $c/c.cm
-  FFI/libharu.cm : make (-f Makefile)
+  hpdfraw.cm
+  hpdf_compression_mode.sml
   hpdf.sml

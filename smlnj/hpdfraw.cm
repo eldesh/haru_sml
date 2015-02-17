@@ -1,0 +1,10 @@
+library
+  library(FFI/libharu.cm)
+    - (structure F_HPDF_CMapEncoder_SetParseText)
+    - (structure F_HPDF_Stream_Flush)
+    - (structure F_HPDF_Stream_EOF)
+is
+  $/basis.cm
+  $c/c.cm
+  FFI/libharu.cm : make (-f Makefile)
+

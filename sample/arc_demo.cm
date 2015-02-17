@@ -2,6 +2,6 @@ group
 is
   $/basis.cm
   $c/c.cm
-  ../smlnj/FFI/libharu.cm
+  ../smlnj/hpdfraw.cm
   arc_demo.sml
 

@@ -1,5 +1,5 @@
 
-structure ArcDemo =
+structure Demo =
 struct
 
   fun check_null' p msg =
