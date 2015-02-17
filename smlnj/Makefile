@@ -20,12 +20,12 @@ all: $(HPDF_API_CM)
 
 
 $(LIBH_SML): ../libh.sml.in
-	@echo "  [GEN] $(notdir $@)"
+	@echo "  GEN [$(notdir $@)]"
 	@sed -e "s|@SHARED_LIB@|$(HPDF_SHARED_LIB)|" $< > $@
 
 
 $(HPDF_API_CM): $(LIBH_SML)
-	@echo "  [FFI] $(notdir $@)"
+	@echo "  FFI [$(notdir $@)]"
 	@$(NLFFIGEN) -allSU -cppopt $(CPP_FLAGS) -I$(HPDF_INCLUDE_DIR) \
 	   	-dir $(FFI_DIR)/ -include ../$(LIBH_SML) \
 		-cmfile $(notdir $@) -match '.*hpdf.*\.h' \
