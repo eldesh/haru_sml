@@ -133,79 +133,81 @@ struct
         C.discard' point
     end
 
+  fun arc_demo file_name =
+    new_pdf (C.Ptr.fnull', C.Ptr.vNull) (fn pdf =>
+    let
+      val page = F_HPDF_AddPage.f' pdf
+    in
+      F_HPDF_Page_SetHeight.f'(page, 220.0);
+      F_HPDF_Page_SetWidth.f'(page, 200.0);
+      print_grid pdf page;
+
+      (* draw pie chart
+       *
+       *   A: 45% Red
+       *   B: 25% Blue
+       *   C: 15% green
+       *   D: other yellow
+       *)
+      (* A *)
+      F_HPDF_Page_SetRGBFill.f'(page, 1.0, 0.0, 0.0);
+      F_HPDF_Page_MoveTo.f'(page, 100.0, 100.0);
+      F_HPDF_Page_LineTo.f'(page, 100.0, 180.0);
+      F_HPDF_Page_Arc.f'(page, 100.0, 100.0, 80.0, 0.0, 360.0 * 0.45);
+    let
+      val pos = HPDF_Page_GetCurrentPos page
+    in
+      F_HPDF_Page_LineTo.f'(page, 100.0, 100.0);
+      F_HPDF_Page_Fill.f' page;
+
+      (* B *)
+      F_HPDF_Page_SetRGBFill.f'(page, 0.0, 0.0, 1.0);
+      F_HPDF_Page_MoveTo.f'(page, 100.0, 100.0);
+      F_HPDF_Page_LineTo.f'(page, #x pos, #y pos);
+      F_HPDF_Page_Arc.f'(page, 100.0, 100.0, 80.0, 360.0 * 0.45, 360.0 * 0.7);
+    let
+      val pos = HPDF_Page_GetCurrentPos page
+    in
+      F_HPDF_Page_LineTo.f'(page, 100.0, 100.0);
+      F_HPDF_Page_Fill.f' page;
+
+      (* C *)
+      F_HPDF_Page_SetRGBFill.f'(page, 0.0, 1.0, 0.0);
+      F_HPDF_Page_MoveTo.f'(page, 100.0, 100.0);
+      F_HPDF_Page_LineTo.f'(page, #x pos, #y pos);
+      F_HPDF_Page_Arc.f'(page, 100.0, 100.0, 80.0, 360.0 * 0.7, 360.0 * 0.85);
+    let
+      val pos = HPDF_Page_GetCurrentPos page
+    in
+      F_HPDF_Page_LineTo.f'(page, 100.0, 100.0);
+      F_HPDF_Page_Fill.f' page;
+
+      (* D *)
+      F_HPDF_Page_SetRGBFill.f' (page, 1.0, 1.0, 0.0);
+      F_HPDF_Page_MoveTo.f' (page, 100.0, 100.0);
+      F_HPDF_Page_LineTo.f'(page, #x pos, #y pos);
+      F_HPDF_Page_Arc.f' (page, 100.0, 100.0, 80.0, 360.0 * 0.85, 360.0);
+    let
+      val pos = HPDF_Page_GetCurrentPos page
+    in
+      F_HPDF_Page_LineTo.f' (page, 100.0, 100.0);
+      F_HPDF_Page_Fill.f' page;
+
+      (* draw center circle *)
+      F_HPDF_Page_SetGrayStroke.f' (page, 0.0);
+      F_HPDF_Page_SetGrayFill.f' (page, 1.0);
+      F_HPDF_Page_Circle.f' (page, 100.0, 100.0, 30.0);
+      F_HPDF_Page_Fill.f' page;
+
+      use_cstring (file_name^".pdf") (fn fname =>
+      F_HPDF_SaveToFile.f'(pdf, fname));
+      OS.Process.success
+    end end end end end)
+
   fun main (name, args) =
     (case args
        of [] => OS.Process.failure
-        | file_name::_ =>
-            new_pdf (C.Ptr.fnull', C.Ptr.vNull) (fn pdf =>
-            let
-              val page = F_HPDF_AddPage.f' pdf
-            in
-              F_HPDF_Page_SetHeight.f'(page, 220.0);
-              F_HPDF_Page_SetWidth.f'(page, 200.0);
-              print_grid pdf page;
-
-              (* draw pie chart
-               *
-               *   A: 45% Red
-               *   B: 25% Blue
-               *   C: 15% green
-               *   D: other yellow
-               *)
-              (* A *)
-              F_HPDF_Page_SetRGBFill.f'(page, 1.0, 0.0, 0.0);
-              F_HPDF_Page_MoveTo.f'(page, 100.0, 100.0);
-              F_HPDF_Page_LineTo.f'(page, 100.0, 180.0);
-              F_HPDF_Page_Arc.f'(page, 100.0, 100.0, 80.0, 0.0, 360.0 * 0.45);
-            let
-              val pos = HPDF_Page_GetCurrentPos page
-            in
-              F_HPDF_Page_LineTo.f'(page, 100.0, 100.0);
-              F_HPDF_Page_Fill.f' page;
-
-              (* B *)
-              F_HPDF_Page_SetRGBFill.f'(page, 0.0, 0.0, 1.0);
-              F_HPDF_Page_MoveTo.f'(page, 100.0, 100.0);
-              F_HPDF_Page_LineTo.f'(page, #x pos, #y pos);
-              F_HPDF_Page_Arc.f'(page, 100.0, 100.0, 80.0, 360.0 * 0.45, 360.0 * 0.7);
-            let
-              val pos = HPDF_Page_GetCurrentPos page
-            in
-              F_HPDF_Page_LineTo.f'(page, 100.0, 100.0);
-              F_HPDF_Page_Fill.f' page;
-
-              (* C *)
-              F_HPDF_Page_SetRGBFill.f'(page, 0.0, 1.0, 0.0);
-              F_HPDF_Page_MoveTo.f'(page, 100.0, 100.0);
-              F_HPDF_Page_LineTo.f'(page, #x pos, #y pos);
-              F_HPDF_Page_Arc.f'(page, 100.0, 100.0, 80.0, 360.0 * 0.7, 360.0 * 0.85);
-            let
-              val pos = HPDF_Page_GetCurrentPos page
-            in
-              F_HPDF_Page_LineTo.f'(page, 100.0, 100.0);
-              F_HPDF_Page_Fill.f' page;
-
-              (* D *)
-              F_HPDF_Page_SetRGBFill.f' (page, 1.0, 1.0, 0.0);
-              F_HPDF_Page_MoveTo.f' (page, 100.0, 100.0);
-              F_HPDF_Page_LineTo.f'(page, #x pos, #y pos);
-              F_HPDF_Page_Arc.f' (page, 100.0, 100.0, 80.0, 360.0 * 0.85, 360.0);
-            let
-              val pos = HPDF_Page_GetCurrentPos page
-            in
-              F_HPDF_Page_LineTo.f' (page, 100.0, 100.0);
-              F_HPDF_Page_Fill.f' page;
-
-              (* draw center circle *)
-              F_HPDF_Page_SetGrayStroke.f' (page, 0.0);
-              F_HPDF_Page_SetGrayFill.f' (page, 1.0);
-              F_HPDF_Page_Circle.f' (page, 100.0, 100.0, 30.0);
-              F_HPDF_Page_Fill.f' page;
-
-              use_cstring (file_name^".pdf") (fn fname =>
-              F_HPDF_SaveToFile.f'(pdf, fname));
-              OS.Process.success
-            end end end end end)
+        | file_name::_ => arc_demo file_name
     ) handle exn => (print(exnMessage exn^"\n")
                     ;OS.Process.failure)
 
