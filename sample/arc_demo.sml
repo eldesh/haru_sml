@@ -122,15 +122,16 @@ struct
 
   fun HPDF_Page_GetCurrentPos page =
     let
+      fun get_x obj = C.Get.float' (S__HPDF_Point.f_x' obj)
+      fun get_y obj = C.Get.float' (S__HPDF_Point.f_y' obj)
+
       val point = C.new' S__HPDF_Point.size
     in
-      F_HPDF_Page_GetCurrentPos.f' (point, page)
+      F_HPDF_Page_GetCurrentPos.f' (point, page);
+      {x=get_x point, y=get_y point}
       before
         C.discard' point
     end
-
-  fun get_x obj = C.Get.float' (S__HPDF_Point.f_x' obj)
-  fun get_y obj = C.Get.float' (S__HPDF_Point.f_y' obj)
 
   fun main (name, args) =
     (case args
@@ -154,7 +155,7 @@ struct
               (* A *)
               F_HPDF_Page_SetRGBFill.f'(page, 1.0, 0.0, 0.0);
               F_HPDF_Page_MoveTo.f'(page, 100.0, 100.0);
-              F_HPDF_Page_LineTo.f'(page, 100.0, 100.0);
+              F_HPDF_Page_LineTo.f'(page, 100.0, 180.0);
               F_HPDF_Page_Arc.f'(page, 100.0, 100.0, 80.0, 0.0, 360.0 * 0.45);
             let
               val pos = HPDF_Page_GetCurrentPos page
@@ -165,7 +166,7 @@ struct
               (* B *)
               F_HPDF_Page_SetRGBFill.f'(page, 0.0, 0.0, 1.0);
               F_HPDF_Page_MoveTo.f'(page, 100.0, 100.0);
-              F_HPDF_Page_LineTo.f'(page, get_x pos, get_y pos);
+              F_HPDF_Page_LineTo.f'(page, #x pos, #y pos);
               F_HPDF_Page_Arc.f'(page, 100.0, 100.0, 80.0, 360.0 * 0.45, 360.0 * 0.7);
             let
               val pos = HPDF_Page_GetCurrentPos page
@@ -176,7 +177,7 @@ struct
               (* C *)
               F_HPDF_Page_SetRGBFill.f'(page, 0.0, 1.0, 0.0);
               F_HPDF_Page_MoveTo.f'(page, 100.0, 100.0);
-              F_HPDF_Page_LineTo.f'(page, get_x pos, get_y pos);
+              F_HPDF_Page_LineTo.f'(page, #x pos, #y pos);
               F_HPDF_Page_Arc.f'(page, 100.0, 100.0, 80.0, 360.0 * 0.7, 360.0 * 0.85);
             let
               val pos = HPDF_Page_GetCurrentPos page
@@ -187,7 +188,7 @@ struct
               (* D *)
               F_HPDF_Page_SetRGBFill.f' (page, 1.0, 1.0, 0.0);
               F_HPDF_Page_MoveTo.f' (page, 100.0, 100.0);
-              F_HPDF_Page_LineTo.f'(page, get_x pos, get_y pos);
+              F_HPDF_Page_LineTo.f'(page, #x pos, #y pos);
               F_HPDF_Page_Arc.f' (page, 100.0, 100.0, 80.0, 360.0 * 0.85, 360.0);
             let
               val pos = HPDF_Page_GetCurrentPos page
