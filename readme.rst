@@ -18,6 +18,14 @@ This binding library is developped with...
 - SML/NJ 110.77
 
 
+Environment
+---------------------------------------------------------------
+
+Linux/x86 is only supported platform.
+But, code depends on Linux and/or x86 is not contained.
+
+
+
 ---------------------------------------------------------------
 
 .. [#smlnj] http://www.smlnj.org/
