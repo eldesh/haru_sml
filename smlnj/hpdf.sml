@@ -16,8 +16,14 @@ local
           C.free'
           f
 in
-  structure CompressionMode = CompressionMode
+  structure CompressionMode = HPDF_CompressionMode
+  structure PermissionFlag = HPDF_PermissionFlag
+  structure ViewerPreference = HPDF_ViewerPreference
+
   datatype z = datatype CompressionMode.t
+  datatype z = datatype PermissionFlag.t
+  datatype z = datatype ViewerPreference.t
+
 
   (* simplify enum type names *)
   structure TextRenderingMode = E__HPDF_TextRenderingMode

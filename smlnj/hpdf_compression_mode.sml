@@ -1,5 +1,5 @@
 
-structure CompressionMode :
+structure HPDF_CompressionMode :
 sig
   datatype t = HPDF_COMP_NONE
              | HPDF_COMP_TEXT
