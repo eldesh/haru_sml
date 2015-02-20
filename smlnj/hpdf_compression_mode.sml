@@ -1,5 +1,14 @@
 
-structure CompressionMode : BIT_FLAGS =
+structure CompressionMode :
+sig
+  datatype t = HPDF_COMP_NONE
+             | HPDF_COMP_TEXT
+             | HPDF_COMP_IMAGE
+             | HPDF_COMP_METADATA
+             | HPDF_COMP_ALL
+             | HPDF_COMP_MASK
+  include BIT_FLAGS
+end =
 struct
   datatype t = HPDF_COMP_NONE
              | HPDF_COMP_TEXT
