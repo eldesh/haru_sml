@@ -110,6 +110,10 @@ in
   val HPDF_OK      = 0
   val HPDF_NOERROR = 0
 
+
+  fun GetVersion () =
+    ZString.toML'(F_HPDF_GetVersion.f'())
+
   fun Page_ShowText page text =
     use_cstring text (fn text =>
     F_HPDF_Page_ShowText.f'(page, text))
