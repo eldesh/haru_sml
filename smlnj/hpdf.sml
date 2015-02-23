@@ -19,10 +19,12 @@ in
   structure CompressionMode = HPDF_CompressionMode
   structure PermissionFlag = HPDF_PermissionFlag
   structure ViewerPreference = HPDF_ViewerPreference
+  structure Status = HPDF_Status
 
   datatype z = datatype CompressionMode.t
   datatype z = datatype PermissionFlag.t
   datatype z = datatype ViewerPreference.t
+  datatype z = datatype Status.t
 
 
   (* simplify enum type names *)
@@ -109,6 +111,51 @@ in
 
   val HPDF_OK      = 0
   val HPDF_NOERROR = 0
+
+  structure Doc =
+  struct
+    fun New (error, data) =
+      F_HPDF_New.f'(error, data)
+
+    fun Free doc =
+      F_HPDF_Free.f' doc
+
+    fun NewDoc pdf =
+      F_HPDF_NewDoc.f' pdf
+
+    fun FreeDoc pdf =
+      F_HPDF_NewDoc.f' pdf
+
+    fun FreeDocAll pdf =
+      F_HPDF_FreeDocAll.f' pdf
+
+    fun HasDoc pdf =
+      F_HPDF_HasDoc.f' pdf <> 0
+
+    fun SaveToFile (pdf, file_name) =
+      use_cstring file_name (fn file_name =>
+      F_HPDF_SaveToFile.f'(pdf, file_name))
+
+    fun GetError pdf =
+      Status.fromWord (F_HPDF_GetError.f' pdf)
+
+    fun GetErrorDetail pdf =
+      Status.fromWord (F_HPDF_GetErrorDetail.f' pdf)
+
+    fun ResetError pdf =
+      F_HPDF_ResetError.f' pdf
+
+    fun SetPagesConfiguration (pdf, page_per_pages) =
+      let val page_per_pages = MLRep.Unsigned.fromLarge (Word.toLarge page_per_pages) in
+        Status.fromWord (F_HPDF_SetPagesConfiguration.f' (pdf, page_per_pages))
+      end
+
+    fun GetPageByIndex (pdf, index) =
+      let val index = MLRep.Unsigned.fromLarge (Word.toLarge index) in
+        F_HPDF_GetPageByIndex.f'(pdf, index)
+      end
+
+  end
 
 
   fun GetVersion () =
