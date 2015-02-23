@@ -16,7 +16,7 @@ OS ?= unix
 SMLNJ_DIR ?= smlnj
 MLBUILD ?= ml-build
 ML_MAKEDEPEND ?= ml-makedepend
-SMLNJ_SUFFIX := $(shell echo 'print(SMLofNJ.SysInfo.getHeapSuffix() ^ "\\n");' | $(SMLNJ) | head -5 | tail -1)
+SMLNJ_SUFFIX := $(shell /bin/echo 'print(SMLofNJ.SysInfo.getHeapSuffix() ^ "\n");' | $(SMLNJ) | head -5 | tail -1)
 
 SAMPLE_DIR := sample
 SAMPLES := arc_demo text_demo
