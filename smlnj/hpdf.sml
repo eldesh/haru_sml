@@ -15,7 +15,18 @@ local
     using (fn()=> ZString.dupML' s)
           C.free'
           f
+
+  fun b2i true  : MLRep.Signed.int = 1
+    | b2i false : MLRep.Signed.int = 0
 in
+  val HPDF_TRUE  : MLRep.Signed.int = 1
+  val HPDF_FALSE : MLRep.Signed.int = 0
+
+  (*
+  val HPDF_OK      = 0
+  val HPDF_NOERROR = 0
+  *)
+
   structure CompressionMode = HPDF_CompressionMode
   structure PermissionFlag = HPDF_PermissionFlag
   structure ViewerPreference = HPDF_ViewerPreference
@@ -105,13 +116,6 @@ in
 
   datatype z = z (* dummy *)
 
-
-  val HPDF_TRUE  : MLRep.Signed.int = 1
-  val HPDF_FALSE : MLRep.Signed.int = 0
-
-  val HPDF_OK      = 0
-  val HPDF_NOERROR = 0
-
   structure Doc =
   struct
     fun New (error, data) =
@@ -154,6 +158,187 @@ in
       let val index = MLRep.Unsigned.fromLarge (Word.toLarge index) in
         F_HPDF_GetPageByIndex.f'(pdf, index)
       end
+
+    fun GetPageLayout pdf =
+      F_HPDF_GetPageLayout.f' pdf
+
+    fun SetPageLayout (pdf, layout) =
+      Status.fromWord (F_HPDF_SetPageLayout .f' (pdf, layout))
+
+    fun GetPageMode pdf =
+      PageMode.i2m (F_HPDF_GetPageMode.f' pdf)
+
+    fun SetPageMode (pdf, mode) =
+      let val mode = PageMode.m2i mode in
+        Status.fromWord (F_HPDF_SetPageMode.f'(pdf, mode))
+      end
+
+    fun SetOpenAction (pdf, open_action) =
+      Status.fromWord (F_HPDF_SetOpenAction.f'(pdf, open_action))
+
+    fun GetViewerPreference pdf =
+      Word32.fromLarge (MLRep.Unsigned.toLarge (F_HPDF_GetViewerPreference.f' pdf))
+
+    fun SetViewerPreference (pdf, value) =
+      let val value = MLRep.Unsigned.fromLarge (Word32.toLarge value) in
+        Status.fromWord (F_HPDF_SetViewerPreference.f'(pdf, value))
+      end
+
+    fun GetCurrentPage pdf =
+      F_HPDF_GetCurrentPage.f' pdf
+
+    fun AddPage pdf =
+      F_HPDF_AddPage.f' pdf
+
+    fun InsertPage (pdf, page) =
+      F_HPDF_InsertPage.f'(pdf, page)
+
+    fun GetFont (pdf, font_name, encoding_name) =
+      use_cstring font_name (fn font_name =>
+      use_cstring encoding_name (fn encoding_name =>
+      F_HPDF_GetFont.f'(pdf, font_name, encoding_name)))
+
+    fun LoadType1FontFromFile (pdf, afm_file_name, data_file_name) =
+      use_cstring afm_file_name  (fn afm_file_name  =>
+      use_cstring data_file_name (fn data_file_name =>
+      ZString.toML'
+        (F_HPDF_LoadType1FontFromFile.f'(pdf, afm_file_name, data_file_name))))
+
+    fun LoadTTFontFromFile (pdf, file_name, embedding) =
+      use_cstring file_name (fn file_name =>
+      ZString.toML'
+        (F_HPDF_LoadTTFontFromFile.f'(pdf, file_name, b2i embedding)))
+
+    fun LoadTTFontFromFile2 (pdf, file_name, index, embedding) =
+      let
+        val index = MLRep.Unsigned.fromLarge (Word.toLarge index)
+      in
+        use_cstring file_name (fn file_name =>
+        F_HPDF_LoadTTFontFromFile2.f'(pdf, file_name, index, b2i embedding))
+      end
+
+    (** to be allowed specify the NULL as prefix? *)
+    fun AddPageLabel (pdf, page_num, style, first_page, prefix) =
+      let
+        val page_num = MLRep.Unsigned.fromLarge (Word.toLarge page_num)
+        val style = PageNumStyle.m2i style
+        val first_page = MLRep.Unsigned.fromLarge (Word.toLarge first_page)
+      in
+        use_cstring prefix (fn prefix =>
+        Status.fromWord
+          (F_HPDF_AddPageLabel.f'(pdf, page_num, style, first_page, prefix)))
+      end
+
+    fun UseJPFonts pdf = Status.fromWord (F_HPDF_UseJPFonts.f' pdf)
+    fun UseKRFonts pdf = Status.fromWord (F_HPDF_UseKRFonts.f' pdf)
+    fun UseCNSFonts pdf = Status.fromWord (F_HPDF_UseCNSFonts.f' pdf)
+    fun UseCNTFonts pdf = Status.fromWord (F_HPDF_UseCNTFonts.f' pdf)
+
+    fun CreateOutline (pdf, parent, title, encoder) =
+      use_cstring title (fn title =>
+      F_HPDF_CreateOutline.f'(pdf, parent, title, encoder))
+
+    fun GetEncoder (pdf, encoding_name) =
+      use_cstring encoding_name (fn encoding_name =>
+      F_HPDF_GetEncoder.f'(pdf, encoding_name))
+
+    fun GetCurrentEncoder pdf =
+      F_HPDF_GetCurrentEncoder.f' pdf
+
+    fun SetCurrentEncoder (pdf, encoding_name) =
+      use_cstring encoding_name (fn encoding_name =>
+      Status.fromWord (F_HPDF_SetCurrentEncoder.f'(pdf, encoding_name)))
+
+    fun UseJPEncodings pdf = Status.fromWord (F_HPDF_UseJPEncodings.f' pdf)
+
+    fun UseKREncodings pdf = Status.fromWord (F_HPDF_UseKREncodings.f' pdf)
+
+    fun UseCNSEncodings pdf = Status.fromWord (F_HPDF_UseCNSEncodings.f' pdf)
+
+    fun UseCNTEncodings pdf = Status.fromWord (F_HPDF_UseCNTEncodings.f' pdf)
+
+    fun LoadPngImageFromFile (pdf, filename) =
+      use_cstring filename (fn filename =>
+      F_HPDF_LoadPngImageFromFile.f'(pdf, filename))
+
+    fun LoadPngImageFromFile2 (pdf, filename) =
+      use_cstring filename (fn filename =>
+      F_HPDF_LoadPngImageFromFile2.f'(pdf, filename))
+
+    fun LoadJpegImageFromFile (pdf, filename) =
+      use_cstring filename (fn filename =>
+      F_HPDF_LoadJpegImageFromFile.f'(pdf, filename))
+
+    fun LoadRawImageFromFile (pdf, filename, width, height, color_space) =
+      let
+        val width = MLRep.Unsigned.fromLarge (Word.toLarge width)
+        val height = MLRep.Unsigned.fromLarge (Word.toLarge height)
+        val color_space = ColorSpace.m2i color_space
+      in
+        use_cstring filename (fn filename =>
+        F_HPDF_LoadRawImageFromFile.f'(pdf, filename, width, height, color_space))
+      end
+
+    fun LoadRawImageFromMem (pdf, buf, width, height, color_space, bits_per_component) =
+      let
+        val ` = MLRep.Unsigned.fromLarge o Word8.toLarge
+        val width  = `width
+        val height = `height
+        val color_space = ColorSpace.m2i color_space
+        val bufp = C.alloc' C.S.uchar (Word.fromInt (Word8Vector.length buf))
+      in
+        Word8Vector.appi (fn (i,x)=>
+          C.Set.uchar' (C.Ptr.sub' C.S.uchar (bufp, i), `x));
+        F_HPDF_LoadRawImageFromMem.f'(pdf, C.Ptr.ro' bufp, width, height, color_space, bits_per_component)
+        before
+          C.free' bufp
+      end
+
+    fun SetInfoAttr (pdf, infotype, value) =
+      use_cstring value (fn value =>
+      Status.fromWord
+        (F_HPDF_SetInfoAttr.f'(pdf, InfoType.m2i infotype, value)))
+
+    fun SetInfoDateAttr (pdf, infotype, value) =
+      Status.fromWord (F_HPDF_SetInfoDateAttr.f'(pdf, InfoType.m2i infotype, value))
+
+    fun GetInfoAttr (pdf, infotype) =
+      ZString.toML' (F_HPDF_GetInfoAttr.f'(pdf, InfoType.m2i infotype))
+
+    fun SetPassword (pdf, owner_passwd, user_passwd) =
+      use_cstring owner_passwd (fn owner_passwd =>
+      use_cstring user_passwd (fn user_passwd =>
+      Status.fromWord (F_HPDF_SetPassword.f'(pdf, owner_passwd, user_passwd))))
+
+    fun SetPermission (pdf, permissions) =
+      let
+        val permission =
+              (MLRep.Unsigned.fromLarge
+                 (SysWord.toLarge
+                    (foldl (fn (f,w)=>
+                                 SysWord.orb(PermissionFlag.toWord f,w))
+                           0w0
+                           permissions)))
+      in
+        Status.fromWord (F_HPDF_SetPermission.f'(pdf, permission))
+      end
+
+    fun SetEncryptionMode (pdf, mode, key_len) =
+      let
+        val mode = EncryptMode.m2i mode
+        val key_len = MLRep.Unsigned.fromLarge (Word.toLarge key_len)
+      in
+        Status.fromWord (F_HPDF_SetEncryptionMode.f'(pdf, mode, key_len))
+      end
+
+    fun SetCompressionMode (pdf, mode) =
+      let val mode = MLRep.Unsigned.fromLarge
+                       (SysWord.toLarge (CompressionMode.toWord mode)) in
+        Status.fromWord (F_HPDF_SetCompressionMode.f'(pdf, mode))
+      end
+
+    fun CreateExtGState pdf =
+      F_HPDF_CreateExtGState.f' pdf
 
   end
 

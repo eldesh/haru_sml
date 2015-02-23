@@ -2,7 +2,8 @@
 structure HPDF_Status =
 struct
   (* error-code *)
-  datatype t = HPDF_ARRAY_COUNT_ERR
+  datatype t = HPDF_OK
+             | HPDF_ARRAY_COUNT_ERR
              | HPDF_ARRAY_ITEM_NOT_FOUND
              | HPDF_ARRAY_ITEM_UNEXPECTED_TYPE
              | HPDF_BINARY_LENGTH_ERR
@@ -125,7 +126,8 @@ struct
 
   fun toWord f : MLRep.Unsigned.word =
     case f
-      of HPDF_ARRAY_COUNT_ERR => 0wx1001
+      of HPDF_OK => 0wx1
+       | HPDF_ARRAY_COUNT_ERR => 0wx1001
        | HPDF_ARRAY_ITEM_NOT_FOUND => 0wx1002
        | HPDF_ARRAY_ITEM_UNEXPECTED_TYPE => 0wx1003
        | HPDF_BINARY_LENGTH_ERR => 0wx1004
@@ -248,7 +250,8 @@ struct
 
   fun fromWord (w:MLRep.Unsigned.word) =
     case w
-      of 0wx1001 => HPDF_ARRAY_COUNT_ERR
+      of 0wx1    => HPDF_OK
+       | 0wx1001 => HPDF_ARRAY_COUNT_ERR
        | 0wx1002 => HPDF_ARRAY_ITEM_NOT_FOUND
        | 0wx1003 => HPDF_ARRAY_ITEM_UNEXPECTED_TYPE
        | 0wx1004 => HPDF_BINARY_LENGTH_ERR
