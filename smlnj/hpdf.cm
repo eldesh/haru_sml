@@ -7,5 +7,6 @@ is
   hpdf_compression_mode.sml
   hpdf_permission_flag.sml
   hpdf_viewer_preference.sml
+  hpdf_graphics_mode.sml
   hpdf_status.sml
   hpdf.sml

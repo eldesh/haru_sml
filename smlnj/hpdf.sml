@@ -18,6 +18,13 @@ local
 
   fun b2i true  : MLRep.Signed.int = 1
     | b2i false : MLRep.Signed.int = 0
+
+  fun to_mlreal r =
+    MLRep.Real.fromLarge IEEEReal.TO_NEAREST (Real.toLarge r)
+
+  fun to_real r =
+    Real.fromLarge IEEEReal.TO_NEAREST (MLRep.Real.toLarge r)
+
 in
   val HPDF_TRUE  : MLRep.Signed.int = 1
   val HPDF_FALSE : MLRep.Signed.int = 0
@@ -30,12 +37,14 @@ in
   structure CompressionMode = HPDF_CompressionMode
   structure PermissionFlag = HPDF_PermissionFlag
   structure ViewerPreference = HPDF_ViewerPreference
+  structure GraphicsMode = HPDF_GraphicsMode
   structure Status = HPDF_Status
 
   datatype z = datatype CompressionMode.t
   datatype z = datatype PermissionFlag.t
   datatype z = datatype ViewerPreference.t
   datatype z = datatype Status.t
+  datatype z = datatype GraphicsMode.t
 
 
   (* simplify enum type names *)
@@ -342,13 +351,378 @@ in
 
   end
 
+  structure Rect =
+  struct
+    type t = { left   : real
+             , bottom : real
+             , right  : real
+             , top    : real
+             }
+  end
+
+  fun HPDF_RectFromRect (r:Rect.t) =
+    let
+      open S__HPDF_Rect
+      val rect = C.new S__HPDF_Rect.typ
+      val cvt = MLRep.Real.fromLarge IEEEReal.TO_NEAREST
+    in
+      C.Set.float (f_left   rect, cvt (#left   r));
+      C.Set.float (f_bottom rect, cvt (#bottom r));
+      C.Set.float (f_right  rect, cvt (#right  r));
+      C.Set.float (f_top    rect, cvt (#top    r));
+      rect
+    end
+
+  fun use_rect' rect =
+    using (fn()=> C.Light.obj (HPDF_RectFromRect rect))
+          C.discard'
+
+  structure Point =
+  struct
+    type t = { x : real
+             , y : real
+             }
+  end
+
+  fun HPDF_PointToPoint p : Point.t =
+    let
+      open S__HPDF_Point
+    in
+      { x = to_real (C.Get.float' (f_x' p))
+      , y = to_real (C.Get.float' (f_y' p))
+      }
+    end
+
+  structure Page =
+  struct
+    fun SetWidth (page, value) =
+      Status.fromWord (F_HPDF_Page_SetWidth.f'(page, value))
+
+    fun SetHeight (page, value) =
+      Status.fromWord (F_HPDF_Page_SetHeight.f'(page, value))
+
+    fun SetSize (page, size, direction) =
+      let
+        val direction = PageDirection.m2i direction
+        val size = PageSizes.m2i size
+      in
+        Status.fromWord (F_HPDF_Page_SetSize.f'(page, size, direction))
+      end
+
+    fun SetRotate (page, angle) =
+      let val angle = MLRep.Unsigned.fromLarge (Word.toLarge angle) in
+        Status.fromWord (F_HPDF_Page_SetRotate.f'(page, angle))
+      end
+
+    fun CreateDestination page =
+      F_HPDF_Page_CreateDestination.f' page
+
+    fun CreateTextAnnot (page, rect, text, encoder) =
+      use_rect' rect (fn rect =>
+      use_cstring text (fn text =>
+      F_HPDF_Page_CreateTextAnnot.f'(page, rect, text, encoder)))
+
+    fun CreateLinkAnnot (page, rect, dst) =
+      use_rect' rect (fn rect =>
+      F_HPDF_Page_CreateLinkAnnot.f'(page, rect, dst))
+
+    fun CreateURILinkAnnot (page, rect, uri) =
+      use_rect' rect (fn rect =>
+      use_cstring uri (fn uri =>
+      F_HPDF_Page_CreateURILinkAnnot.f'(page, rect, uri)))
+
+    fun TextWidth (page, text) =
+      use_cstring text (fn text =>
+      F_HPDF_Page_TextWidth.f'(page, text))
+
+    fun MeasureText (page, text, width, wordwrap, real_width) =
+      let
+        val width = to_mlreal width
+        val wordwrap = b2i wordwrap
+        val real_widthp = C.new' C.S.float
+      in
+        C.Set.float' (real_widthp, to_mlreal (!real_width));
+        use_cstring text (fn text =>
+        Word.fromLarge
+          (MLRep.Unsigned.toLarge
+             (F_HPDF_Page_MeasureText.f'( page
+                                        , text
+                                        , width
+                                        , wordwrap
+                                        , C.Ptr.|&! real_widthp))))
+        before
+          real_width := to_real (C.Get.float' real_widthp)
+      end
+
+    fun GetWidth page =
+      to_real (F_HPDF_Page_GetWidth.f' page)
+
+    fun GetHeight page =
+      to_real (F_HPDF_Page_GetHeight.f' page)
+
+    fun GetGMode page =
+      CompressionMode.fromWord (F_HPDF_Page_GetGMode.f' page)
+
+    fun GetCurrentPos page =
+      let
+        val point = C.new' S__HPDF_Point.size
+      in
+        HPDF_PointToPoint
+          (F_HPDF_Page_GetCurrentPos.f'(point, page))
+        before
+          C.discard' point
+      end
+
+    fun GetCurrentTextPos page =
+      let
+        val point = C.new' S__HPDF_Point.size
+      in
+        HPDF_PointToPoint
+          (F_HPDF_Page_GetCurrentTextPos.f'(point, page))
+        before
+          C.discard' point
+      end
+
+    fun GetCurrentFont page =
+      F_HPDF_Page_GetCurrentFont.f' page
+
+    fun GetCurrentFontSize page =
+      to_real (F_HPDF_Page_GetCurrentFontSize.f' page)
+
+    fun GetTransMatrix page =
+      F_HPDF_Page_GetTransMatrix.f' page
+
+    fun GetLineWidth page =
+      to_real (F_HPDF_Page_GetLineWidth.f' page)
+
+    fun GetLineCap page =
+      LineCap.i2m (F_HPDF_Page_GetLineCap.f' page)
+
+    fun GetLineJoin page =
+      LineJoin.i2m (F_HPDF_Page_GetLineJoin.f' page)
+
+    fun GetMiterLimit page =
+      to_real (F_HPDF_Page_GetMiterLimit.f' page)
+
+    fun GetDash page =
+      F_HPDF_Page_GetDash.f' page
+
+    fun GetFlat page =
+      to_real (F_HPDF_Page_GetFlat.f' page)
+
+    fun GetCharSpace page =
+      to_real (F_HPDF_Page_GetCharSpace.f' page)
+
+    fun GetWordSpace page =
+      to_real (F_HPDF_Page_GetWordSpace.f' page)
+
+    fun GetHorizontalScalling page =
+      to_real (F_HPDF_Page_GetHorizontalScalling.f' page)
+
+    fun GetTextLeading page =
+      to_real (F_HPDF_Page_GetTextLeading.f' page)
+
+    fun GetTextRenderingMode page =
+      TextRenderingMode.i2m (F_HPDF_Page_GetTextRenderingMode.f' page)
+
+    fun GetTextRaise page =
+      to_real (F_HPDF_Page_GetTextRaise.f' page)
+
+    fun GetRGBFill page =
+      F_HPDF_Page_GetRGBFill.f' page
+
+    fun GetRGBStroke page =
+      F_HPDF_Page_GetRGBStroke.f' page
+
+    fun GetCMYKFill page =
+      F_HPDF_Page_GetCMYKFill.f' page
+
+    fun GetCMYKStroke page =
+      F_HPDF_Page_GetCMYKStroke.f' page
+
+    fun GetGrayFill page =
+      to_real (F_HPDF_Page_GetGrayFill.f' page)
+
+    fun GetGrayStroke page =
+      to_real (F_HPDF_Page_GetGrayStroke.f' page)
+
+    fun GetStrokingColorSpace page =
+      F_HPDF_Page_GetStrokingColorSpace.f' page
+
+    fun GetFillingColorSpace page =
+      F_HPDF_Page_GetFillingColorSpace.f' page
+
+    fun GetTextMatrix page =
+      F_HPDF_Page_GetTextMatrix.f' page
+
+    fun GetGStateDepth page =
+      Word.fromLarge
+        (MLRep.Unsigned.toLarge
+            (F_HPDF_Page_GetGStateDepth.f' page))
+
+    fun SetLineWidth (page, line_width) =
+      Status.fromWord (F_HPDF_Page_SetLineWidth.f' (page, line_width))
+
+    fun SetLineCap (page, line_cap) =
+      let val line_cap = LineCap.m2i line_cap in
+        Status.fromWord (F_HPDF_Page_SetLineCap.f'(page, line_cap))
+      end
+
+    fun SetLineJoin (page, line_join) =
+      let val line_join = LineJoin.m2i line_join in
+        Status.fromWord (F_HPDF_Page_SetLineJoin.f'(page, line_join))
+      end
+
+    fun SetMiterLimit (page, miter_limit) =
+      let val miter_limit = to_mlreal miter_limit in
+        Status.fromWord (F_HPDF_Page_SetMiterLimit.f'(page, miter_limit))
+      end
+
+    fun app_arr f (len,arr) =
+      let
+        fun loop n =
+          if n = len
+          then ()
+          else (f (n, C.Ptr.sub (arr,n)); loop (n+1))
+      in
+        loop 0
+      end
+
+    fun vec2ptr vec =
+      let
+        val len = Vector.length vec
+        val vec_ptr = C.alloc C.T.ushort (Word.fromInt len)
+      in
+        app_arr (fn (i,obj)=> C.Set.ushort (obj
+                     , MLRep.Unsigned.fromLarge
+                         (Word.toLarge
+                           (Vector.sub(vec,i)))))
+                (len, vec_ptr);
+        C.Ptr.ro vec_ptr
+      end
+
+    fun SetDash (page, dash, phase) =
+      let
+        val dash_ptn = C.Light.ptr (vec2ptr dash)
+        val num_param = MLRep.Unsigned.fromInt (Vector.length dash)
+        val phase = MLRep.Unsigned.fromLarge (Word.toLarge phase)
+      in
+        Status.fromWord
+          (F_HPDF_Page_SetDash.f'(page, dash_ptn, num_param, phase))
+        before
+          C.free' dash_ptn
+      end
+
+    fun SetFlat (page, flatness) =
+      let val flatness = to_mlreal flatness in
+        Status.fromWord (F_HPDF_Page_SetFlat.f'(page, flatness))
+      end
+
+    fun SetExtGState (page, ext_gstate) =
+      Status.fromWord (F_HPDF_Page_SetExtGState.f'(page, ext_gstate))
+
+    fun GSave page =
+      Status.fromWord (F_HPDF_Page_GSave.f' page)
+
+    fun GRestore page =
+      Status.fromWord (F_HPDF_Page_GRestore.f' page)
+
+    fun Concat (page, a, b, c, d, x, y) =
+      let
+        val a = to_mlreal a
+        val b = to_mlreal b
+        val c = to_mlreal c
+        val d = to_mlreal d
+        val x = to_mlreal x
+        val y = to_mlreal y
+      in
+        Status.fromWord (F_HPDF_Page_Concat.f'(page, a, b, c, d, x, y))
+      end
+
+    fun MoveTo (page, x, y) =
+      Status.fromWord (F_HPDF_Page_MoveTo.f'(page, x, y))
+
+    fun LineTo (page, x, y) =
+      Status.fromWord (F_HPDF_Page_LineTo.f'(page, x, y))
+
+    fun CurveTo (page, x1, y1, x2, y2, x3, y3) =
+      Status.fromWord (F_HPDF_Page_CurveTo.f'(page, x1, y1, x2, y2, x3, y3))
+
+    fun CurveTo2 (page, x2, y2, x3, y3) =
+      Status.fromWord (F_HPDF_Page_CurveTo2.f'(page, x2, y2, x3, y3))
+
+    fun CurveTo3 (page, x1, y1, x3, y3) =
+      Status.fromWord (F_HPDF_Page_CurveTo3.f'(page, x1, y1, x3, y3))
+
+    fun ClosePath page =
+      Status.fromWord (F_HPDF_Page_ClosePath.f' page)
+
+    fun Rectangle (page, x, y, width, height) =
+      let
+        val x = to_mlreal x
+        val y = to_mlreal y
+        val width = to_mlreal width
+        val height = to_mlreal height
+      in
+        Status.fromWord
+          (F_HPDF_Page_Rectangle.f'(page
+                                   , x, y
+                                   , width, height))
+      end
+
+    fun Stroke page =
+      F_HPDF_Page_Stroke.f' page
+
+    fun ClosePathStroke page =
+      Status.fromWord (F_HPDF_Page_ClosePathStroke.f' page)
+
+    fun Fill page =
+      Status.fromWord (F_HPDF_Page_Fill.f' page)
+
+    fun Eofill page =
+      Status.fromWord (F_HPDF_Page_Eofill.f' page)
+
+    fun FillStroke page =
+      Status.fromWord (F_HPDF_Page_FillStroke.f' page)
+
+    fun EofillStroke page =
+      Status.fromWord (F_HPDF_Page_EofillStroke.f' page)
+
+    fun ClosePathFillStroke page =
+      Status.fromWord (F_HPDF_Page_ClosePathFillStroke.f' page)
+
+    fun ClosePathEofillStroke page =
+      Status.fromWord (F_HPDF_Page_ClosePathEofillStroke.f' page)
+
+    fun EndPath page =
+      Status.fromWord (F_HPDF_Page_EndPath.f' page)
+
+    fun Clip page =
+      Status.fromWord (F_HPDF_Page_Clip.f' page)
+
+    fun Eoclip page =
+      Status.fromWord (F_HPDF_Page_Eoclip.f' page)
+
+    fun BeginText page =
+      Status.fromWord (F_HPDF_Page_BeginText.f' page)
+
+    fun EndText page =
+      Status.fromWord (F_HPDF_Page_EndText.f' page)
+
+    fun SetCharSpace (page, value) =
+      F_HPDF_Page_SetCharSpace.f'(page, value)
+
+
+
+    fun Page_ShowText (page, text) =
+      use_cstring text (fn text =>
+      F_HPDF_Page_ShowText.f'(page, text))
+
+  end
+
 
   fun GetVersion () =
     ZString.toML'(F_HPDF_GetVersion.f'())
-
-  fun Page_ShowText page text =
-    use_cstring text (fn text =>
-    F_HPDF_Page_ShowText.f'(page, text))
 
 end (* local *)
 end
