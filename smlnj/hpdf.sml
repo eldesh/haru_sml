@@ -640,19 +640,52 @@ in
       end
 
     fun MoveTo (page, x, y) =
-      Status.fromWord (F_HPDF_Page_MoveTo.f'(page, x, y))
+      let
+        val x = to_mlreal x
+        val y = to_mlreal y
+      in
+        Status.fromWord (F_HPDF_Page_MoveTo.f'(page, x, y))
+      end
 
     fun LineTo (page, x, y) =
-      Status.fromWord (F_HPDF_Page_LineTo.f'(page, x, y))
+      let
+        val x = to_mlreal x
+        val y = to_mlreal y
+      in
+        Status.fromWord (F_HPDF_Page_LineTo.f'(page, x, y))
+      end
 
     fun CurveTo (page, x1, y1, x2, y2, x3, y3) =
-      Status.fromWord (F_HPDF_Page_CurveTo.f'(page, x1, y1, x2, y2, x3, y3))
+      let
+        val x1 = to_mlreal x1
+        val y1 = to_mlreal y1
+        val x2 = to_mlreal x2
+        val y2 = to_mlreal y2
+        val x3 = to_mlreal x3
+        val y3 = to_mlreal y3
+      in
+        Status.fromWord (F_HPDF_Page_CurveTo.f'(page, x1, y1, x2, y2, x3, y3))
+      end
 
     fun CurveTo2 (page, x2, y2, x3, y3) =
-      Status.fromWord (F_HPDF_Page_CurveTo2.f'(page, x2, y2, x3, y3))
+      let
+        val x2 = to_mlreal x2
+        val y2 = to_mlreal y2
+        val x3 = to_mlreal x3
+        val y3 = to_mlreal y3
+      in
+        Status.fromWord (F_HPDF_Page_CurveTo2.f'(page, x2, y2, x3, y3))
+      end
 
     fun CurveTo3 (page, x1, y1, x3, y3) =
-      Status.fromWord (F_HPDF_Page_CurveTo3.f'(page, x1, y1, x3, y3))
+      let
+        val x1 = to_mlreal x1
+        val y1 = to_mlreal y1
+        val x3 = to_mlreal x3
+        val y3 = to_mlreal y3
+      in
+        Status.fromWord (F_HPDF_Page_CurveTo3.f'(page, x1, y1, x3, y3))
+      end
 
     fun ClosePath page =
       Status.fromWord (F_HPDF_Page_ClosePath.f' page)
@@ -671,7 +704,7 @@ in
       end
 
     fun Stroke page =
-      F_HPDF_Page_Stroke.f' page
+      Status.fromWord (F_HPDF_Page_Stroke.f' page)
 
     fun ClosePathStroke page =
       Status.fromWord (F_HPDF_Page_ClosePathStroke.f' page)
@@ -710,14 +743,208 @@ in
       Status.fromWord (F_HPDF_Page_EndText.f' page)
 
     fun SetCharSpace (page, value) =
-      F_HPDF_Page_SetCharSpace.f'(page, value)
+      Status.fromWord (F_HPDF_Page_SetCharSpace.f'(page, to_mlreal value))
 
+    fun SetWordSpace (page, value) =
+      Status.fromWord (F_HPDF_Page_SetWordSpace.f'(page, to_mlreal value))
 
+    fun SetHorizontalScalling (page, value) =
+      Status.fromWord (F_HPDF_Page_SetHorizontalScalling.f'(page, to_mlreal value))
+
+    fun SetTextLeading (page, value) =
+      Status.fromWord (F_HPDF_Page_SetTextLeading.f'(page, to_mlreal value))
+
+    fun SetFontAndSize (page, hfont, size) =
+      Status.fromWord (F_HPDF_Page_SetFontAndSize.f'(page, hfont, to_mlreal size))
+
+    fun SetTextRenderingMode (page, mode) =
+      let val mode = TextRenderingMode.m2i mode in
+        Status.fromWord (F_HPDF_Page_SetTextRenderingMode.f'(page, mode))
+      end
+
+    fun SetTextRise (page, value) =
+      Status.fromWord (F_HPDF_Page_SetTextRise.f'(page, to_mlreal value))
+
+    (**
+     * This function is obsolete. Use Hpdf.Page.SetTextRise
+     *)
+    (*
+    fun SetTextRaise (page, value) =
+      Status.fromWord
+        (F_HPDF_Page_SetTextRaise.f'(page, to_mlreal value))
+    *)
+
+    fun MoveTextPos (page, x, y) =
+      let
+        val x = to_mlreal x
+        val y = to_mlreal y
+      in
+        Status.fromWord (F_HPDF_Page_MoveTextPos.f'(page, x, y))
+      end
+
+    fun MoveTextPos2 (page, x, y) =
+      let
+        val x = to_mlreal x
+        val y = to_mlreal y
+      in
+        Status.fromWord (F_HPDF_Page_MoveTextPos2.f'(page, x, y))
+      end
+
+    fun SetTextMatrix (page, a, b, c, d, x, y) =
+      let
+        val a = to_mlreal a
+        val b = to_mlreal b
+        val c = to_mlreal c
+        val d = to_mlreal d
+        val x = to_mlreal x
+        val y = to_mlreal y
+      in
+        Status.fromWord
+          (F_HPDF_Page_SetTextMatrix.f'(page, a, b, c, d, x, y))
+      end
+
+    fun MoveToNextLine page =
+      Status.fromWord (F_HPDF_Page_MoveToNextLine.f' page)
 
     fun Page_ShowText (page, text) =
       use_cstring text (fn text =>
-      F_HPDF_Page_ShowText.f'(page, text))
+      Status.fromWord (F_HPDF_Page_ShowText.f'(page, text)))
 
+    fun ShowTextNextLine (page, text) =
+      Status.fromWord (F_HPDF_Page_ShowTextNextLine.f'(page, text))
+
+    fun ShowTextNextLineEx (page, word_space, char_space, text) =
+      let
+        val word_space = to_mlreal word_space
+        val char_space = to_mlreal char_space
+      in
+        Status.fromWord
+          (F_HPDF_Page_ShowTextNextLineEx.f'(page, word_space, char_space, text))
+      end
+
+    fun SetGrayFill (page, gray) =
+      Status.fromWord (F_HPDF_Page_SetGrayFill.f'(page, to_mlreal gray))
+
+    fun SetGrayStroke (page, gray) =
+      Status.fromWord (F_HPDF_Page_SetGrayStroke.f'(page, to_mlreal gray))
+
+    fun SetRGBFill (page, r, g, b) =
+      let
+        val r = to_mlreal r
+        val g = to_mlreal g
+        val b = to_mlreal b
+      in
+        Status.fromWord (F_HPDF_Page_SetRGBFill.f'(page, r, g, b))
+      end
+
+    fun SetRGBStroke (page, r, g, b) =
+      let
+        val r = to_mlreal r
+        val g = to_mlreal g
+        val b = to_mlreal b
+      in
+        Status.fromWord (F_HPDF_Page_SetRGBStroke.f'(page, r, g, b))
+      end
+
+    fun SetCMYKFill (page, c, m, y, k) =
+      let
+        val c = to_mlreal c
+        val m = to_mlreal m
+        val y = to_mlreal y
+        val k = to_mlreal k
+      in
+        Status.fromWord (F_HPDF_Page_SetCMYKFill.f'(page, c, m, y, k))
+      end
+
+    fun SetCMYKStroke (page, c, m, y, k) =
+      let
+        val c = to_mlreal c
+        val m = to_mlreal m
+        val y = to_mlreal y
+        val k = to_mlreal k
+      in
+        Status.fromWord (F_HPDF_Page_SetCMYKStroke.f'(page, c, m, y, k))
+      end
+
+    fun ExecuteXObject (page, obj) =
+      Status.fromWord (F_HPDF_Page_ExecuteXObject.f'(page, obj))
+
+    fun DrawImage (page, image, x, y, width, height) =
+      let
+        val x = to_mlreal x
+        val y = to_mlreal y
+        val width  = to_mlreal width
+        val height = to_mlreal height
+      in
+        Status.fromWord
+          (F_HPDF_Page_DrawImage.f'(page, image, x, y, width, height))
+      end
+
+    fun Circle (page, x, y, ray) =
+      let
+        val x = to_mlreal x
+        val y = to_mlreal y
+        val ray = to_mlreal ray
+      in
+        Status.fromWord (F_HPDF_Page_Circle.f'(page, x, y, ray))
+      end
+
+    fun Arc (page, x, y, ray, ang1, ang2) =
+      let
+        val x = to_mlreal x
+        val y = to_mlreal y
+        val ray = to_mlreal ray
+        val ang1 = to_mlreal ang1
+        val ang2 = to_mlreal ang2
+      in
+        Status.fromWord (F_HPDF_Page_Arc.f'(page, x, y, ray, ang1, ang2))
+      end
+
+    fun Ellipse (page, x, y, xray, yray) =
+      let
+        val x = to_mlreal x
+        val y = to_mlreal y
+        val xray = to_mlreal xray
+        val yray = to_mlreal yray
+      in
+        Status.fromWord (F_HPDF_Page_Ellipse.f'(page, x, y, xray, yray))
+      end
+
+    fun TextOut (page, xpos, ypos, text) =
+      let
+        val xpos = to_mlreal xpos
+        val ypos = to_mlreal ypos
+      in
+        use_cstring text (fn text =>
+        Status.fromWord (F_HPDF_Page_TextOut.f'(page, xpos, ypos, text)))
+      end
+
+    fun TextRect (page, left, top, right, bottom, text, align, len) =
+      let
+        val left = to_mlreal left
+        val top  = to_mlreal top
+        val right = to_mlreal right
+        val bottom = to_mlreal bottom
+        val align = TextAlignment.m2i align
+        val lenp = C.new' C.S.uint
+      in
+        C.Set.uint' (lenp, MLRep.Unsigned.fromLarge (Word.toLarge (!len)));
+        Status.fromWord
+          (F_HPDF_Page_TextRect.f'(page, left, top, right, bottom
+                                  , text, align, C.Ptr.|&! lenp))
+        before
+          len := Word.fromLarge (MLRep.Unsigned.toLarge (C.Get.uint' lenp))
+      end
+
+    fun SetSlideShow (page, style, disp_time, trans_time) =
+      let
+        val style = TransitionStyle.m2i style
+        val disp_time = to_mlreal disp_time
+        val trans_time = to_mlreal trans_time
+      in
+        Status.fromWord
+          (F_HPDF_Page_SetSlideShow.f'(page, style, disp_time, trans_time))
+      end
   end
 
 
