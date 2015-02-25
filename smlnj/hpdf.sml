@@ -125,6 +125,101 @@ in
 
   datatype z = z (* dummy *)
 
+  structure Rect =
+  struct
+    type t = { left   : real
+             , bottom : real
+             , right  : real
+             , top    : real
+             }
+
+  end
+
+  structure Box =
+  struct
+    type t = Rect.t
+  end
+
+  structure Point =
+  struct
+    type t = { x : real
+             , y : real
+             }
+  end
+
+  structure TextWidth =
+  struct
+    type t = { numchars : Word.word
+             , width    : Word.word
+             , numspace : Word.word
+             }
+  end
+
+
+  structure Cvt :
+  sig
+    val c_rect   : Rect.t -> (T_HPDF_Rect.t, 'c) C.obj
+    val c_box    : Box.t  -> (T_HPDF_Box.t, 'c) C.obj
+
+    val ml_box'       : (T_HPDF_Box.t      , 'c) C.obj' -> Box.t
+    val ml_point'     : (T_HPDF_Point.t    , 'c) C.obj' -> Point.t
+    val ml_textwidth' : (T_HPDF_TextWidth.t, 'c) C.obj' -> TextWidth.t
+  end =
+  struct
+    fun c_rect (r:Rect.t) =
+      let
+        open S__HPDF_Rect
+        val rect = C.new S__HPDF_Rect.typ
+        val cvt = MLRep.Real.fromLarge IEEEReal.TO_NEAREST
+      in
+        C.Set.float (f_left   rect, cvt (#left   r));
+        C.Set.float (f_bottom rect, cvt (#bottom r));
+        C.Set.float (f_right  rect, cvt (#right  r));
+        C.Set.float (f_top    rect, cvt (#top    r));
+        C.rw rect
+      end
+
+    val c_box : Box.t -> (T_HPDF_Box.t, 'c) C.obj = c_rect
+
+    fun ml_rect' rect =
+      let
+        open S__HPDF_Rect
+        val cvt = MLRep.Real.fromLarge IEEEReal.TO_NEAREST
+      in
+        { left   = C.Get.float' (f_left'   rect)
+        , bottom = C.Get.float' (f_bottom' rect)
+        , right  = C.Get.float' (f_right'  rect)
+        , top    = C.Get.float' (f_top'    rect)
+        } 
+      end
+
+    val ml_box' = ml_rect';
+
+    fun ml_point' p : Point.t =
+      let open S__HPDF_Point in
+        { x = to_real (C.Get.float' (f_x' p))
+        , y = to_real (C.Get.float' (f_y' p))
+        }
+      end
+
+    fun ml_textwidth' t : TextWidth.t =
+      let
+        open S__HPDF_TextWidth
+        val cvt = Word.fromLarge o MLRep.Unsigned.toLarge
+      in
+        { numchars = cvt (C.Get.uint' (f_numchars' t))
+        , width    = cvt (C.Get.uint' (f_width'    t))
+        , numspace = cvt (C.Get.uint' (f_numspace' t))
+        }
+      end
+
+  end
+
+  fun use_rect' rect =
+    using (fn()=> C.Light.obj (Cvt.c_rect rect))
+          C.discard'
+
+
   structure Doc =
   struct
     fun New (error, data) =
@@ -351,47 +446,6 @@ in
 
   end
 
-  structure Rect =
-  struct
-    type t = { left   : real
-             , bottom : real
-             , right  : real
-             , top    : real
-             }
-  end
-
-  fun HPDF_RectFromRect (r:Rect.t) =
-    let
-      open S__HPDF_Rect
-      val rect = C.new S__HPDF_Rect.typ
-      val cvt = MLRep.Real.fromLarge IEEEReal.TO_NEAREST
-    in
-      C.Set.float (f_left   rect, cvt (#left   r));
-      C.Set.float (f_bottom rect, cvt (#bottom r));
-      C.Set.float (f_right  rect, cvt (#right  r));
-      C.Set.float (f_top    rect, cvt (#top    r));
-      rect
-    end
-
-  fun use_rect' rect =
-    using (fn()=> C.Light.obj (HPDF_RectFromRect rect))
-          C.discard'
-
-  structure Point =
-  struct
-    type t = { x : real
-             , y : real
-             }
-  end
-
-  fun HPDF_PointToPoint p : Point.t =
-    let
-      open S__HPDF_Point
-    in
-      { x = to_real (C.Get.float' (f_x' p))
-      , y = to_real (C.Get.float' (f_y' p))
-      }
-    end
 
   structure Page =
   struct
@@ -467,7 +521,7 @@ in
       let
         val point = C.new' S__HPDF_Point.size
       in
-        HPDF_PointToPoint
+        Cvt.ml_point'
           (F_HPDF_Page_GetCurrentPos.f'(point, page))
         before
           C.discard' point
@@ -477,7 +531,7 @@ in
       let
         val point = C.new' S__HPDF_Point.size
       in
-        HPDF_PointToPoint
+        Cvt.ml_point'
           (F_HPDF_Page_GetCurrentTextPos.f'(point, page))
         before
           C.discard' point
@@ -946,6 +1000,92 @@ in
           (F_HPDF_Page_SetSlideShow.f'(page, style, disp_time, trans_time))
       end
   end
+
+  fun maybeptr' ptr f null =
+    if C.Ptr.isNull' ptr
+    then f ptr
+    else null
+
+  structure Font =
+  struct
+    fun GetFontName font =
+      maybeptr' (F_HPDF_Font_GetFontName.f' font)
+                (SOME o ZString.toML')
+                NONE
+
+    fun GetEncodingName font =
+      maybeptr' (F_HPDF_Font_GetEncodingName.f' font)
+                (SOME o ZString.toML')
+                NONE
+
+    fun GetUnicodeWidth (font, code) =
+      let val code = MLRep.Unsigned.fromLarge (Word.toLarge code) in
+        Int.fromLarge
+          (MLRep.Signed.toLarge
+             (F_HPDF_Font_GetUnicodeWidth.f'(font, code)))
+      end
+
+    fun GetBBox font =
+      Cvt.ml_box' (F_HPDF_Font_GetBBox.f' font)
+
+    fun GetAscent font =
+      Int.fromLarge
+        (MLRep.Signed.toLarge
+           (F_HPDF_Font_GetAscent.f' font))
+
+    fun GetDescent font =
+      Int.fromLarge
+        (MLRep.Signed.toLarge
+           (F_HPDF_Font_GetDescent.f' font))
+
+    fun GetXHeight font =
+      Word.fromLarge
+        (MLRep.Unsigned.toLarge
+           (F_HPDF_Font_GetXHeight.f' font))
+
+    fun GetCapHeight font =
+      Word.fromLarge
+        (MLRep.Unsigned.toLarge
+           (F_HPDF_Font_GetCapHeight.f' font))
+
+    fun TextWidth (font, text, len) =
+      let
+        val tw = C.new' S__HPDF_TextWidth.size
+        val len = MLRep.Unsigned.fromLarge (Word.toLarge len)
+      in
+        use_cstring text (fn text =>
+        Cvt.ml_textwidth'
+          (F_HPDF_Font_TextWidth.f'(tw, font, text, len)))
+        before
+          C.discard' tw
+      end
+
+    fun MeasureText (font, text, len
+                    , width, font_size, char_space, word_space
+                    , wordwrap, real_width) =
+      let
+        val width = to_real width
+        val font_size = to_real font_size
+        val char_space = to_real char_space
+        val word_space = to_real word_space
+        val wordwrap = b2i wordwrap
+        val real_widthp = C.new' C.S.float
+      in
+        C.Set.float' (real_widthp, to_real (!real_width));
+        Word.fromLarge
+          (MLRep.Unsigned.toLarge
+             (F_HPDF_Font_MeasureText.f'
+                      (font, text, len
+                      , width, font_size, char_space, word_space
+                      , wordwrap, C.Ptr.|&! real_widthp)))
+        before
+          real_width := to_mlreal (C.Get.float' real_widthp)
+        before
+          C.discard' real_widthp
+      end
+
+
+  end (* Font *)
 
 
   fun GetVersion () =
