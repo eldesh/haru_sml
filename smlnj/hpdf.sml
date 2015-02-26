@@ -1084,8 +1084,22 @@ in
           C.discard' real_widthp
       end
 
-
   end (* Font *)
+
+
+  structure Outline =
+  struct
+    fun CreateOutline (pdf, parent, title, encoder) =
+      use_cstring title (fn title =>
+      F_HPDF_CreateOutline.f'(pdf, parent, title, encoder))
+
+    fun SetOpened (outline, opened) =
+      Status.fromWord (F_HPDF_Outline_SetOpened.f'(outline, b2i opened))
+
+    fun SetDestination (outline, dest) =
+      Status.fromWord (F_HPDF_Outline_SetDestination.f'(outline, dest))
+
+  end
 
 
   fun GetVersion () =
