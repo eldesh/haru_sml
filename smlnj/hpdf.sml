@@ -1099,7 +1099,30 @@ in
     fun SetDestination (outline, dest) =
       Status.fromWord (F_HPDF_Outline_SetDestination.f'(outline, dest))
 
-  end
+  end (* Outline *)
+
+  structure Encoder =
+  struct
+    fun GetType encoder =
+      EncoderType.i2m (F_HPDF_Encoder_GetType.f' encoder)
+
+    fun GetByteType (encoder, text, index) =
+      let val index = MLRep.Unsigned.fromLarge (Word.toLarge index) in
+        use_cstring text (fn text =>
+        ByteType.i2m (F_HPDF_Encoder_GetByteType.f'(encoder, text, index)))
+      end
+
+    fun GetUnicode (encoder, code) =
+      let val code = MLRep.Unsigned.fromLarge (Word32.toLarge code) in
+        Word32.fromLarge
+          (MLRep.Unsigned.toLarge
+            (F_HPDF_Encoder_GetUnicode.f'(encoder, code)))
+      end
+
+    fun GetWritingMode encoder =
+      WritingMode.i2m (F_HPDF_Encoder_GetWritingMode.f' encoder)
+
+  end (* Encoder *)
 
 
   fun GetVersion () =
