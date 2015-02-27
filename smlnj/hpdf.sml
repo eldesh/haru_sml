@@ -452,10 +452,10 @@ in
   structure Page =
   struct
     fun SetWidth (page, value) =
-      Status.fromWord (F_HPDF_Page_SetWidth.f'(page, value))
+      Status.fromWord (F_HPDF_Page_SetWidth.f'(page, to_mlreal value))
 
     fun SetHeight (page, value) =
-      Status.fromWord (F_HPDF_Page_SetHeight.f'(page, value))
+      Status.fromWord (F_HPDF_Page_SetHeight.f'(page, to_mlreal value))
 
     fun SetSize (page, size, direction) =
       let
@@ -862,7 +862,7 @@ in
     fun MoveToNextLine page =
       Status.fromWord (F_HPDF_Page_MoveToNextLine.f' page)
 
-    fun Page_ShowText (page, text) =
+    fun ShowText (page, text) =
       use_cstring text (fn text =>
       Status.fromWord (F_HPDF_Page_ShowText.f'(page, text)))
 
