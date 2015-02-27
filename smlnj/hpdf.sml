@@ -1126,6 +1126,41 @@ in
 
   end (* Encoder *)
 
+  structure Destination =
+  struct
+    fun SetXYZ (dest, left, top, zoom) =
+      let
+        val left = to_mlreal left
+        val top  = to_mlreal top
+        val zoom = to_mlreal zoom
+      in
+        Status.fromWord (F_HPDF_Destination_SetXYZ.f'(dest, left, top, zoom))
+      end
+
+    fun SetFit dest =
+      Status.fromWord (F_HPDF_Destination_SetFit.f' dest)
+
+    fun SetFitH (dest, top) =
+      Status.fromWord (F_HPDF_Destination_SetFitH.f'(dest, to_mlreal top))
+
+    fun SetFitV (dest, left) =
+      Status.fromWord (F_HPDF_Destination_SetFitV.f'(dest, to_mlreal left))
+
+    fun SetFitR (dest, left, bottom, right, top) =
+      Status.fromWord
+        (F_HPDF_Destination_SetFitR.f'(dest, left, bottom, right, top))
+
+    fun SetFitB dest =
+      Status.fromWord (F_HPDF_Destination_SetFitB.f' dest)
+
+    fun SetFitBH (dest, top) =
+      Status.fromWord (F_HPDF_Destination_SetFitBH.f'(dest, to_mlreal top))
+
+    fun SetFitBV (dest, left) =
+      Status.fromWord (F_HPDF_Destination_SetFitBV.f'(dest, to_mlreal left))
+
+  end (* Destination *)
+
 
   fun GetVersion () =
     ZString.toML'(F_HPDF_GetVersion.f'())
