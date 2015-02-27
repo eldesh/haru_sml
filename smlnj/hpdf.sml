@@ -1239,6 +1239,23 @@ in
 
   end (* Image *)
 
+  structure ExtGState =
+  struct
+    fun SetAlphaStroke (gstate, value) =
+      let val value = to_mlreal value in
+        Status.fromWord (F_HPDF_ExtGState_SetAlphaStroke.f'(gstate, value))
+      end
+
+    fun SetAlphaFill (gstate, value) =
+      Status.fromWord (F_HPDF_ExtGState_SetAlphaFill.f'(gstate, value))
+
+    fun SetBlendMode (gstate, mode) =
+      let val mode = BlendMode.m2i mode in
+        Status.fromWord (F_HPDF_ExtGState_SetBlendMode.f'(gstate, mode))
+      end
+
+  end (* ExtGState *)
+
 
   fun GetVersion () =
     ZString.toML'(F_HPDF_GetVersion.f'())
