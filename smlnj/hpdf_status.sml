@@ -126,7 +126,7 @@ struct
 
   fun toWord f : MLRep.Unsigned.word =
     case f
-      of HPDF_OK => 0wx1
+      of HPDF_OK => 0wx0
        | HPDF_ARRAY_COUNT_ERR => 0wx1001
        | HPDF_ARRAY_ITEM_NOT_FOUND => 0wx1002
        | HPDF_ARRAY_ITEM_UNEXPECTED_TYPE => 0wx1003
@@ -250,7 +250,7 @@ struct
 
   fun fromWord (w:MLRep.Unsigned.word) =
     case w
-      of 0wx1    => HPDF_OK
+      of 0wx0    => HPDF_OK
        | 0wx1001 => HPDF_ARRAY_COUNT_ERR
        | 0wx1002 => HPDF_ARRAY_ITEM_NOT_FOUND
        | 0wx1003 => HPDF_ARRAY_ITEM_UNEXPECTED_TYPE
