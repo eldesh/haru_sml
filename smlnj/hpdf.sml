@@ -155,11 +155,13 @@ in
              }
   end
 
-
+  (**
+   * convert data between C and ML layer
+   *)
   structure Cvt :
   sig
     val c_rect   : Rect.t -> (T_HPDF_Rect.t, 'c) C.obj
-    val c_box    : Box.t  -> (T_HPDF_Box.t, 'c) C.obj
+    val c_box    : Box.t  -> (T_HPDF_Box.t , 'c) C.obj
 
     val ml_box'       : (T_HPDF_Box.t      , 'c) C.obj' -> Box.t
     val ml_point'     : (T_HPDF_Point.t    , 'c) C.obj' -> Point.t
