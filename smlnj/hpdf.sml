@@ -1190,6 +1190,55 @@ in
 
   end (* Annotation *)
 
+  structure XObject =
+  struct
+  end (* XObject *)
+
+  structure Image =
+  struct
+    fun GetSize image =
+      let
+        val point = C.new' S__HPDF_Point.size
+      in
+        Cvt.ml_point' (F_HPDF_Image_GetSize.f'(point, image))
+        before
+          C.discard' point
+      end
+
+    fun GetWidth image =
+      Word.fromLarge
+        (MLRep.Unsigned.toLarge (F_HPDF_Image_GetWidth.f' image))
+
+    fun GetHeight image =
+      Word.fromLarge
+        (MLRep.Unsigned.toLarge (F_HPDF_Image_GetHeight.f' image))
+
+    fun GetBitsPerComponent image =
+      Word.fromLarge
+        (MLRep.Unsigned.toLarge (F_HPDF_Image_GetBitsPerComponent.f' image))
+
+    fun GetColorSpace image =
+      ZString.toML' (F_HPDF_Image_GetColorSpace.f' image)
+
+    fun SetColorMask (image, rmin, rmax, gmin, gmax, bmin, bmax) =
+      let
+        val rmin = MLRep.Unsigned.fromLarge (Word8.toLarge rmin)
+        val rmax = MLRep.Unsigned.fromLarge (Word8.toLarge rmax)
+        val gmin = MLRep.Unsigned.fromLarge (Word8.toLarge gmin)
+        val gmax = MLRep.Unsigned.fromLarge (Word8.toLarge gmax)
+        val bmin = MLRep.Unsigned.fromLarge (Word8.toLarge bmin)
+        val bmax = MLRep.Unsigned.fromLarge (Word8.toLarge bmax)
+      in
+        Status.fromWord
+          (F_HPDF_Image_SetColorMask.f'
+             (image, rmin, rmax, gmin, gmax, bmin, bmax))
+      end
+
+    fun SetMaskImage (image, mask_image) =
+      Status.fromWord (F_HPDF_Image_SetMaskImage.f'(image, mask_image))
+
+  end (* Image *)
+
 
   fun GetVersion () =
     ZString.toML'(F_HPDF_GetVersion.f'())
