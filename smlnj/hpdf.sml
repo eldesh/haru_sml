@@ -1161,6 +1161,35 @@ in
 
   end (* Destination *)
 
+  structure Annotation =
+  struct
+    fun SetHighlightMode (annot, mode) =
+      let val mode = AnnotHighlightMode.m2i mode in
+        Status.fromWord (F_HPDF_LinkAnnot_SetHighlightMode.f'(annot, mode))
+      end
+
+    fun SetBorderStyle (annot, width, dash_on, dash_off) =
+      let
+        val width = to_mlreal width
+        val dash_on  = MLRep.Unsigned.fromLarge (Word.toLarge dash_on)
+        val dash_off = MLRep.Unsigned.fromLarge (Word.toLarge dash_off)
+      in
+        Status.fromWord
+          (F_HPDF_LinkAnnot_SetBorderStyle.f'(annot, width, dash_on, dash_off))
+      end
+
+    fun SetIcon (annot, icon) =
+      let val icon = AnnotIcon.m2i icon in
+        Status.fromWord (F_HPDF_TextAnnot_SetIcon.f'(annot, icon))
+      end
+
+    fun SetOpened (annot, opened) =
+      let val opened = b2i opened in
+        Status.fromWord (F_HPDF_TextAnnot_SetOpened.f'(annot, opened))
+      end
+
+  end (* Annotation *)
+
 
   fun GetVersion () =
     ZString.toML'(F_HPDF_GetVersion.f'())
