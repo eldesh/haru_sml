@@ -19,7 +19,7 @@ ML_MAKEDEPEND ?= ml-makedepend
 SMLNJ_SUFFIX := $(shell /bin/echo 'print(SMLofNJ.SysInfo.getHeapSuffix() ^ "\n");' | $(SMLNJ) | head -5 | tail -1)
 
 SAMPLE_DIR := sample
-SAMPLES := arc_demo text_demo slide_show_demo
+SAMPLES := arc_demo text_demo slide_show_demo jpfont_demo
 SAMPLE_BINS := $(addprefix $(SAMPLE_DIR)/,$(SAMPLES:=.$(SMLNJ_SUFFIX)))
 
 all: smlnj

@@ -299,9 +299,13 @@ in
     fun InsertPage (pdf, page) =
       F_HPDF_InsertPage.f'(pdf, page)
 
+    fun use_optstring NONE f = using (fn ()=> C.Ptr.null') ignore f
+      | use_optstring (SOME s) f = use_cstring s f
+
+
     fun GetFont (pdf, font_name, encoding_name) =
-      use_cstring font_name (fn font_name =>
-      use_cstring encoding_name (fn encoding_name =>
+      use_optstring font_name (fn font_name =>
+      use_optstring encoding_name (fn encoding_name =>
       F_HPDF_GetFont.f'(pdf, font_name, encoding_name)))
 
     fun LoadType1FontFromFile (pdf, afm_file_name, data_file_name) =
@@ -340,9 +344,11 @@ in
     fun UseCNSFonts pdf = Status.fromWord (F_HPDF_UseCNSFonts.f' pdf)
     fun UseCNTFonts pdf = Status.fromWord (F_HPDF_UseCNTFonts.f' pdf)
 
-    fun CreateOutline (pdf, parent, title, encoder) =
-      use_cstring title (fn title =>
-      F_HPDF_CreateOutline.f'(pdf, parent, title, encoder))
+    fun CreateOutline (pdf, parent, NONE, encoder) =
+         F_HPDF_CreateOutline.f'(pdf, parent, C.Ptr.null', encoder)
+      | CreateOutline (pdf, parent, SOME title, encoder) =
+        use_cstring title (fn title =>
+        F_HPDF_CreateOutline.f'(pdf, parent, title, encoder))
 
     fun GetEncoder (pdf, encoding_name) =
       use_cstring encoding_name (fn encoding_name =>
@@ -446,7 +452,7 @@ in
     fun CreateExtGState pdf =
       F_HPDF_CreateExtGState.f' pdf
 
-  end
+  end (* Doc *)
 
 
   structure Page =
