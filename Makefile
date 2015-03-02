@@ -34,7 +34,7 @@ smlnj:
 %.cm.d: %.cm
 	@echo "  GEN [$@]"
 	@touch $@
-	@$(ML_MAKEDEPEND) -f $@ $< -a $(ARCH) -o $(OS) $(<:.cm=).$(SMLNJ_SUFFIX)
+	@$(ML_MAKEDEPEND) -f $@ -a $(ARCH) -o $(OS) $< $(<:.cm=).$(SMLNJ_SUFFIX)
 
 
 .PHONY: runsample
