@@ -1010,7 +1010,7 @@ in
   end
 
   fun maybeptr' ptr f null =
-    if C.Ptr.isNull' ptr
+    if not (C.Ptr.isNull' ptr)
     then f ptr
     else null
 
