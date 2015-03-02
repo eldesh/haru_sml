@@ -16,6 +16,9 @@ local
           C.free'
           f
 
+  fun use_optstring NONE f = using (fn ()=> C.Ptr.null') ignore f
+    | use_optstring (SOME s) f = use_cstring s f
+
   fun b2i true  : MLRep.Signed.int = 1
     | b2i false : MLRep.Signed.int = 0
 
@@ -299,12 +302,8 @@ in
     fun InsertPage (pdf, page) =
       F_HPDF_InsertPage.f'(pdf, page)
 
-    fun use_optstring NONE f = using (fn ()=> C.Ptr.null') ignore f
-      | use_optstring (SOME s) f = use_cstring s f
-
-
     fun GetFont (pdf, font_name, encoding_name) =
-      use_optstring font_name (fn font_name =>
+      use_cstring   font_name     (fn font_name =>
       use_optstring encoding_name (fn encoding_name =>
       F_HPDF_GetFont.f'(pdf, font_name, encoding_name)))
 

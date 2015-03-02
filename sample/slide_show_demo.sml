@@ -151,7 +151,7 @@ in
     new_pdf (C.Ptr.fnull', C.Ptr.vNull) (fn pdf =>
     let
       (* create default-font *)
-      val font = Doc.GetFont (pdf, SOME "Courier", SOME "StandardEncoding")
+      val font = Doc.GetFont (pdf, "Courier", SOME "StandardEncoding")
       (* Add 17 pages to the document. *)
       val page = Vector.tabulate(17, fn _=> Doc.AddPage pdf)
       infix :@ 

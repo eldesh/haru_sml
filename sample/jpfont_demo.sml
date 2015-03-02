@@ -47,7 +47,7 @@ struct
       Doc.UseJPFonts pdf;
     let
       val fonts =
-        map (fn (font,enc) => Doc.GetFont (pdf, SOME font, SOME enc))
+        map (fn (font,enc) => Doc.GetFont (pdf, font, SOME enc))
         [ ("MS-Mincho", "90ms-RKSJ-H")
         , ("MS-Mincho,Bold", "90ms-RKSJ-H")
         , ("MS-Mincho,Italic", "90ms-RKSJ-H")
@@ -85,7 +85,7 @@ struct
       in
         Outline.SetDestination (outline, dst);
       let
-        val title_font = Doc.GetFont (pdf, SOME "Helvetica", NONE)
+        val title_font = Doc.GetFont (pdf, "Helvetica", NONE)
         open Page
       in
         SetFontAndSize (page, title_font, 10.0);
