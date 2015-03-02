@@ -45,7 +45,7 @@ runsample: $(SAMPLE_BINS)
 	done
 
 
-$(SAMPLE_BINS): %.$(SMLNJ_SUFFIX): %.cm smlnj
+$(SAMPLE_BINS): %.$(SMLNJ_SUFFIX): %.cm
 	@echo "  BUILD [$(notdir $*)]"
 	@$(MLBUILD) $< Demo.main $@
 
