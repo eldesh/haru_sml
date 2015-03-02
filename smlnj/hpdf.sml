@@ -344,11 +344,9 @@ in
     fun UseCNSFonts pdf = Status.fromWord (F_HPDF_UseCNSFonts.f' pdf)
     fun UseCNTFonts pdf = Status.fromWord (F_HPDF_UseCNTFonts.f' pdf)
 
-    fun CreateOutline (pdf, parent, NONE, encoder) =
-         F_HPDF_CreateOutline.f'(pdf, parent, C.Ptr.null', encoder)
-      | CreateOutline (pdf, parent, SOME title, encoder) =
-        use_cstring title (fn title =>
-        F_HPDF_CreateOutline.f'(pdf, parent, title, encoder))
+    fun CreateOutline (pdf, parent, title, encoder) =
+      use_optstring title (fn title =>
+      F_HPDF_CreateOutline.f'(pdf, parent, title, encoder))
 
     fun GetEncoder (pdf, encoding_name) =
       use_cstring encoding_name (fn encoding_name =>
