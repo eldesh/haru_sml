@@ -1194,10 +1194,6 @@ in
 
   end (* Annotation *)
 
-  structure XObject =
-  struct
-  end (* XObject *)
-
   structure Image =
   struct
     fun GetSize image =
