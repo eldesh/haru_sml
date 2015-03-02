@@ -25,6 +25,36 @@ Linux/x86 is only supported platform.
 But, code depends on Linux and/or x86 is not contained.
 
 
+Build
+---------------------------------------------------------------
+
+If SML/NJ and LibHaru is installed on your systme,
+just perform **make** is required for building libharu/sml.
+
+::
+    $ make
+
+
+If the LibHaru has been installed in locale different from default path (/usr/{include,lib}...),
+Specify the path to the header and library files of LibHaru explicitly.
+
+::
+    $ HPDF_INCLUDE_DIR = /path/to/include \
+      HPDF_SHARED_LIB = /path/to/libhpdf.so \
+      make
+
+
+
+Sample
+---------------------------------------------------------------
+
+Some demo programs are ported from official demo programs.
+Execute these demos, specify **runsample** target as a make target like below:
+
+::
+    $ make runsample
+
+
 
 ---------------------------------------------------------------
 
