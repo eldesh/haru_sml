@@ -89,9 +89,7 @@ in
       (Page.BeginText page;
        Page.TextOut (page, 680.0, 50.0, "Next=>");
        Page.EndText page;
-       let
-         val dst = Page.CreateDestination next
-       in
+       let val dst = Page.CreateDestination next in
          Destination.SetFit dst;
        let
          val rect = { left   = 680.0
@@ -111,9 +109,7 @@ in
        Page.TextOut (page, 50.0, 50.0, "<=Prev");
        Page.EndText page;
 
-       let
-         val dst = Page.CreateDestination prev
-       in
+       let val dst = Page.CreateDestination prev in
          Destination.SetFit dst;
        let
          val rect = { left   =  50.0
