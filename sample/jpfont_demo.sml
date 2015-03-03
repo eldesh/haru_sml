@@ -38,7 +38,7 @@ struct
       val PAGE_HEIGHT = 210.0
       val samp_text = using (fn()=> TextIO.openIn "sample/mbtext/sjis.txt")
                             TextIO.closeIn
-                            (fn f=> TextIO.inputN (f, 2048))
+                            TextIO.inputAll
     in
       (* configure pdf-document to be compressed. *)
       Doc.SetCompressionMode (pdf, HPDF_COMP_ALL);

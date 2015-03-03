@@ -188,12 +188,11 @@ in
       let
         open S__HPDF_Rect
         val rect = C.new S__HPDF_Rect.typ
-        val cvt = MLRep.Real.fromLarge IEEEReal.TO_NEAREST
       in
-        C.Set.float (f_left   rect, cvt (#left   r));
-        C.Set.float (f_bottom rect, cvt (#bottom r));
-        C.Set.float (f_right  rect, cvt (#right  r));
-        C.Set.float (f_top    rect, cvt (#top    r));
+        C.Set.float (f_left   rect, to_mlreal (#left   r));
+        C.Set.float (f_bottom rect, to_mlreal (#bottom r));
+        C.Set.float (f_right  rect, to_mlreal (#right  r));
+        C.Set.float (f_top    rect, to_mlreal (#top    r));
         C.rw rect
       end
 
@@ -202,13 +201,12 @@ in
     fun ml_rect' rect =
       let
         open S__HPDF_Rect
-        val cvt = MLRep.Real.fromLarge IEEEReal.TO_NEAREST
       in
         { left   = C.Get.float' (f_left'   rect)
         , bottom = C.Get.float' (f_bottom' rect)
         , right  = C.Get.float' (f_right'  rect)
         , top    = C.Get.float' (f_top'    rect)
-        } 
+        }
       end
 
     val ml_box' = ml_rect';
