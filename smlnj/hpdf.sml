@@ -286,10 +286,14 @@ in
       Status.fromWord (F_HPDF_SetOpenAction.f'(pdf, open_action))
 
     fun GetViewerPreference pdf =
-      Word32.fromLarge (MLRep.Unsigned.toLarge (F_HPDF_GetViewerPreference.f' pdf))
+      ViewerPreference.fromWord (F_HPDF_GetViewerPreference.f' pdf)
 
-    fun SetViewerPreference (pdf, value) =
-      let val value = MLRep.Unsigned.fromLarge (Word32.toLarge value) in
+    fun SetViewerPreference (pdf, values) =
+      let
+        open ViewerPreference
+        val value = foldl (fn(f,w)=> MLRep.Unsigned.orb(toWord f,w))
+                          0w0 values
+      in
         Status.fromWord (F_HPDF_SetViewerPreference.f'(pdf, value))
       end
 
@@ -421,13 +425,10 @@ in
 
     fun SetPermission (pdf, permissions) =
       let
-        val permission =
-              (MLRep.Unsigned.fromLarge
-                 (SysWord.toLarge
-                    (foldl (fn (f,w)=>
-                                 SysWord.orb(PermissionFlag.toWord f,w))
-                           0w0
-                           permissions)))
+        open PermissionFlag
+        val permission = foldl (fn (f,w)=> MLRep.Unsigned.orb(toWord f,w))
+                               0w0
+                               permissions
       in
         Status.fromWord (F_HPDF_SetPermission.f'(pdf, permission))
       end
@@ -440,9 +441,11 @@ in
         Status.fromWord (F_HPDF_SetEncryptionMode.f'(pdf, mode, key_len))
       end
 
-    fun SetCompressionMode (pdf, mode) =
-      let val mode = MLRep.Unsigned.fromLarge
-                       (SysWord.toLarge (CompressionMode.toWord mode)) in
+    fun SetCompressionMode (pdf, modes) =
+      let
+        open CompressionMode
+        val mode = foldl MLRep.Unsigned.orb 0w0 (map toWord modes)
+      in
         Status.fromWord (F_HPDF_SetCompressionMode.f'(pdf, mode))
       end
 
@@ -520,7 +523,7 @@ in
       to_real (F_HPDF_Page_GetHeight.f' page)
 
     fun GetGMode page =
-      CompressionMode.fromWord (F_HPDF_Page_GetGMode.f' page)
+      GraphicsMode.fromWord (F_HPDF_Page_GetGMode.f' page)
 
     fun GetCurrentPos page =
       let
