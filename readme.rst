@@ -28,7 +28,7 @@ But, code depends on Linux and/or x86 is not contained.
 Build
 ---------------------------------------------------------------
 
-If SML/NJ and LibHaru is installed on your systme,
+If SML/NJ and LibHaru is installed on your system,
 just perform **make** is required for building libharu/sml.
 
 ::
@@ -39,8 +39,8 @@ If the LibHaru has been installed in locale different from default path (/usr/{i
 Specify the path to the header and library files of LibHaru explicitly.
 
 ::
-    $ HPDF_INCLUDE_DIR = /path/to/include \
-      HPDF_SHARED_LIB = /path/to/libhpdf.so \
+    $ HPDF_INCLUDE_DIR=/path/to/include \
+      HPDF_SHARED_LIB=/path/to/libhpdf.so \
       make
 
 
