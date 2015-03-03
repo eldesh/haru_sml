@@ -1,4 +1,12 @@
 
+(**
+ * Top level module of LibHaru <-> SML/NJ binding
+ *
+ * structure Hpdf containts:
+ * - constants
+ * - enums
+ * - most APIs published from hpdf.h
+ *)
 structure Hpdf =
 struct
 local
@@ -37,20 +45,22 @@ in
   val HPDF_NOERROR = 0
   *)
 
+  (* categorized constants *)
   structure CompressionMode = HPDF_CompressionMode
   structure PermissionFlag = HPDF_PermissionFlag
   structure ViewerPreference = HPDF_ViewerPreference
   structure GraphicsMode = HPDF_GraphicsMode
   structure Status = HPDF_Status
 
+  (* #define-d constants *)
   datatype z = datatype CompressionMode.t
+  val HPDF_COMP_ALL = CompressionMode.HPDF_COMP_ALL
   datatype z = datatype PermissionFlag.t
   datatype z = datatype ViewerPreference.t
   datatype z = datatype Status.t
   datatype z = datatype GraphicsMode.t
 
-
-  (* simplify enum type names *)
+  (* simplified enum type structures *)
   structure TextRenderingMode = E__HPDF_TextRenderingMode
   structure WritingMode = E__HPDF_WritingMode
   structure WhenceMode = E__HPDF_WhenceMode
@@ -128,6 +138,10 @@ in
 
   datatype z = z (* dummy *)
 
+  (**
+   * value types
+   *)
+
   structure Rect =
   struct
     type t = { left   : real
@@ -135,7 +149,6 @@ in
              , right  : real
              , top    : real
              }
-
   end
 
   structure Box =
