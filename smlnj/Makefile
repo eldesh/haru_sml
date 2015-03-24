@@ -34,7 +34,7 @@ $(HPDF_API_CM): $(LIBH_SML)
 
 .PHONY: clean
 clean:
-	-rm -rf .cm
-	-rm -rf $(FFI_DIR)
-	-rm $(LIBH_SML)
+	$(RM) -r .cm
+	$(RM) -r $(FFI_DIR)
+	$(RM) $(LIBH_SML)
 

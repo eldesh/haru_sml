@@ -57,10 +57,10 @@ endif
 
 .PHONY: clean
 clean:
-	-make -C $(SMLNJ_DIR) clean
-	-rm -rf .cm
-	-rm -rf sample/.cm
-	-rm $(SAMPLE_BINS)
-	-rm $(SAMPLE_BINS:.$(SMLNJ_SUFFIX)=.cm.d)
-	-rm $(SAMPLE_BINS:.$(SMLNJ_SUFFIX)=.pdf)
+	$(MAKE) -C $(SMLNJ_DIR) clean
+	$(RM) -r .cm
+	$(RM) -r sample/.cm
+	$(RM) $(SAMPLE_BINS)
+	$(RM) $(SAMPLE_BINS:.$(SMLNJ_SUFFIX)=.cm.d)
+	$(RM) $(SAMPLE_BINS:.$(SMLNJ_SUFFIX)=.pdf)
 
