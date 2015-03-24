@@ -251,7 +251,7 @@ in
       F_HPDF_Free.f' doc
 
     fun NewDoc pdf =
-      F_HPDF_NewDoc.f' pdf
+      Status.fromWord (F_HPDF_NewDoc.f' pdf)
 
     fun FreeDoc pdf =
       F_HPDF_NewDoc.f' pdf
@@ -264,7 +264,7 @@ in
 
     fun SaveToFile (pdf, file_name) =
       use_cstring file_name (fn file_name =>
-      F_HPDF_SaveToFile.f'(pdf, file_name))
+      Status.fromWord (F_HPDF_SaveToFile.f'(pdf, file_name)))
 
     fun GetError pdf =
       Status.fromWord (F_HPDF_GetError.f' pdf)
@@ -286,10 +286,12 @@ in
       end
 
     fun GetPageLayout pdf =
-      F_HPDF_GetPageLayout.f' pdf
+      PageMode.i2m (F_HPDF_GetPageLayout.f' pdf)
 
     fun SetPageLayout (pdf, layout) =
-      Status.fromWord (F_HPDF_SetPageLayout .f' (pdf, layout))
+      let val layout = PageLayout.m2i layout in
+        Status.fromWord (F_HPDF_SetPageLayout .f' (pdf, layout))
+      end
 
     fun GetPageMode pdf =
       PageMode.i2m (F_HPDF_GetPageMode.f' pdf)
