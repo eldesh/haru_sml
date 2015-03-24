@@ -235,7 +235,6 @@ in
     using (fn()=> C.Light.obj (Cvt.c_rect rect))
           C.discard'
 
-
   structure Doc =
   struct
     fun New (error, data) =
@@ -1038,12 +1037,12 @@ in
     fun GetFontName font =
       maybeptr' (F_HPDF_Font_GetFontName.f' font)
                 (SOME o ZString.toML')
-                NONE
+                 NONE
 
     fun GetEncodingName font =
       maybeptr' (F_HPDF_Font_GetEncodingName.f' font)
                 (SOME o ZString.toML')
-                NONE
+                 NONE
 
     fun GetUnicodeWidth (font, code) =
       let val code = MLRep.Unsigned.fromLarge (Word.toLarge code) in
@@ -1218,13 +1217,9 @@ in
   structure Image =
   struct
     fun GetSize image =
-      let
-        val point = C.new' S__HPDF_Point.size
-      in
-        Cvt.ml_point' (F_HPDF_Image_GetSize.f'(point, image))
-        before
-          C.discard' point
-      end
+      using (fn()=> C.new' S__HPDF_Point.size)
+             C.discard'
+            (fn p=> Cvt.ml_point' (F_HPDF_Image_GetSize.f'(p, image)))
 
     fun GetWidth image =
       Word.fromLarge
