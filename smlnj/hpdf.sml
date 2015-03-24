@@ -239,7 +239,13 @@ in
   structure Doc =
   struct
     fun New (error, data) =
-      F_HPDF_New.f'(error, data)
+      if C.Ptr.isFNull' error
+      then F_HPDF_New.f'(error, data)
+           (* for error detection,
+            * check the returned value and use GetError function
+            *)
+      else raise Fail
+                "function pointer is not supported by SML/NJ"
 
     fun Free doc =
       F_HPDF_Free.f' doc
